@@ -82,8 +82,8 @@ It really helps to reduce a huge amount of code, especially when you have to mak
 ##### Parameters
 - `original object` [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String "String") The object to update;
 
-- `path string`  [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String "String") Path string, that consists of a list of properties joined by dot;
-- `value` Any? The value to insert;
+- `path string`  [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String "String") | [Object](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Object "Object") Path string, that consists of a list of properties joined by dot; Or it can be an object where keys are paths and values are values for the paths.
+- `value` Any? The value to insert; You won't need to specify this if you use an object as a second argument.
 
 Returns updated object;
 
