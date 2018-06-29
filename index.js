@@ -4,6 +4,13 @@ const firstOf = arr => arr[0];
 const lastOf = arr => arr[arr.length - 1];
 
 const update = (source, path, value) => {
+  if (isObject(path)) {
+    const config = path;
+
+    return Object.keys(config)
+      .reduce((output, key) => update(output, key, config[key]), source);
+  }
+
   if (source === value) {
     return value;
   }
