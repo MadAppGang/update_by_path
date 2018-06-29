@@ -1,4 +1,4 @@
-const copyOf = object => ({ ...object });
+const copyOf = object => Object.assign({}, object);
 const isObject = object => typeof object === 'object' 
 const firstOf = arr => arr[0];
 const lastOf = arr => arr[arr.length - 1];
@@ -36,3 +36,9 @@ const update = (source, path, value) => {
 
   return output;
 };
+
+Object.defineProperty(exports, "__esModule", { value: true });
+
+exports.default = update;
+
+module.exports = update;

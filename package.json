@@ -1,0 +1,26 @@
+{
+  "name": "update-by-path",
+  "version": "1.0.0",
+  "description": "Update any field of an object using short string path notation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MadAppGang/update_object_by_path.git"
+  },
+  "keywords": [
+    "update",
+    "object",
+    "path",
+    "immutable",
+    "recursive"
+  ],
+  "author": "MadAppGang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MadAppGang/update_object_by_path/issues"
+  },
+  "homepage": "https://github.com/MadAppGang/update_object_by_path#readme"
+}
