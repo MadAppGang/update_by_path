@@ -1,4 +1,4 @@
-Update object by path
+Update by path
 ===
 This function allows you to update fields of your object any level deep without mutating the original object.
 
@@ -8,11 +8,11 @@ This function allows you to update fields of your object any level deep without 
 - overwrite fields, if they already exist;
 
 ### Installation
-`npm install --save deep-update-object-shorthand`
+`npm install --save update-by-path`
 
 Then using es6 import the function:
 ```javascript
-import update from 'deep-update-object-shorthand';
+import update from 'update-by-path';
 ```
 
 ### Usage
@@ -50,6 +50,14 @@ This does not look compact at all, so there is a way to get rid of that massive 
 Using the shorthand function the code will look like the following:
 ```javascript
 const updatedPerson = update(person, 'job.since.month', 7);
+```
+
+I can also update multiple fields at once using a slightly different notation:
+```javascript
+const updatedPerson = update(person, {
+  'job.since.month': 7,
+  'job.position': 'Software architect',
+});
 ```
 
 ##### Note: the function does not mutate the original object
