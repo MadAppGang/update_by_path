@@ -2,6 +2,7 @@ const copyOf = object => Object.assign({}, object);
 const isObject = object => typeof object === 'object' 
 const firstOf = arr => arr[0];
 const lastOf = arr => arr[arr.length - 1];
+const isFunction = f => typeof f === 'function';
 
 const update = (source, path, value) => {
   if (isObject(path)) {
@@ -11,17 +12,13 @@ const update = (source, path, value) => {
       .reduce((output, key) => update(output, key, config[key]), source);
   }
 
-  if (source === value) {
-    return value;
-  }
-
   const output = copyOf(source);
   const pathNodes = path.split('.');
   const reducedPath = pathNodes.slice(1).join('.');
   const node = firstOf(pathNodes);
 
   if (!reducedPath) {
-    output[node] = value;
+    output[node] = isFunction(value) ? value(output[node]) : value;
     return output;
   }
 
