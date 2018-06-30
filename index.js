@@ -22,8 +22,7 @@ const update = (source, path, value) => {
     return output;
   }
 
-  // TODO: do not compare nodes, they can duplicate. Compare indexes instead.
-  const isLastNode = node === lastOf(pathNodes);
+  const isLastNode = pathNodes.length === 1;
 
   const nextStepValue = isObject(source[node])
     ? copyOf(source[node])
