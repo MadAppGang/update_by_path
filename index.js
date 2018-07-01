@@ -1,8 +1,19 @@
-const copyOf = object => Object.assign({}, object);
-const isObject = object => typeof object === 'object' 
-const firstOf = arr => arr[0];
-const lastOf = arr => arr[arr.length - 1];
+const isObject = o => typeof o === 'object' 
 const isFunction = f => typeof f === 'function';
+const firstOf = arr => arr[0];
+const copyOf = o => Object.assign({}, o);
+
+const replaceInArray = (arr, currentValue, nextValue) => {
+  return arr.map((value) => {
+    if (value !== currentValue) {
+      return value;
+    }
+
+    return nextValue;
+  }).filter(value => typeof value !== 'undefined');
+};
+
+const arrayQueryRegex = /\[(.*)\]/;
 
 const update = (source, path, value) => {
   if (isObject(path)) {
@@ -15,11 +26,26 @@ const update = (source, path, value) => {
   const output = copyOf(source);
   const pathNodes = path.split('.');
   const reducedPath = pathNodes.slice(1).join('.');
-  const node = firstOf(pathNodes);
+
+  let node = firstOf(pathNodes);
+
+  const arrayQueryMatch = node.match(arrayQueryRegex);
+
+  node = node.replace(arrayQueryRegex, '');
 
   if (!reducedPath) {
-    output[node] = isFunction(value) ? value(output[node]) : value;
-    return output;
+    const getValue = currentValue =>
+      isFunction(value) ? value(currentValue) : value;
+
+    if (arrayQueryMatch && Array.isArray(output[node])) {
+      const query = arrayQueryMatch[1];
+
+      output[node] = replaceInArray(output[node], query, getValue(output[node]));
+      return output;
+    } else {
+      output[node] = getValue(output[node]);
+      return output;
+    }
   }
 
   const isLastNode = pathNodes.length === 1;
