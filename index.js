@@ -13,6 +13,9 @@ const replaceInArray = (arr, currentValue, nextValue) => {
   }).filter(value => typeof value !== 'undefined');
 };
 
+const replaceValue = (currentValue, _value) =>
+  isFunction(_value) ? _value(currentValue) : _value;
+
 const arrayQueryRegex = /\[(.*)\]/;
 
 const update = (source, path, value) => {
@@ -34,16 +37,16 @@ const update = (source, path, value) => {
   node = node.replace(arrayQueryRegex, '');
 
   if (!reducedPath) {
-    const getValue = currentValue =>
-      isFunction(value) ? value(currentValue) : value;
-
     if (arrayQueryMatch && Array.isArray(output[node])) {
+      const arr = output[node];
       const query = arrayQueryMatch[1];
+      const currentValue = arr.find(v => v === query);
 
-      output[node] = replaceInArray(output[node], query, getValue(output[node]));
+      output[node] =
+        replaceInArray(arr, query, replaceValue(currentValue, value));
       return output;
     } else {
-      output[node] = getValue(output[node]);
+      output[node] = replaceValue(output[node], value);
       return output;
     }
   }
