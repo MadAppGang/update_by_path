@@ -28,6 +28,7 @@ const person = {
       month: 8,
       day: 14,
     },
+    skills: ['html', 'css', 'javascript'],
   },
 };
 ```
@@ -60,12 +61,21 @@ const updatedPerson = update(person, {
 });
 ```
 
-If you need to apply more complex logic you may pass a function as a value. The function accepts the current value and should return a new one.
+If you I need to apply more complex logic i can pass a function as a value. The function accepts the current value and should return a new one.
 
 ```javascript
 const updatedPerson = update(person, {
   'job.since.month': month => month + 2,
   'job.position': 'Software architect',
+});
+```
+
+I also have an ability to reach array elements by specifying the value I am interested in surrounded by brackets.
+
+```javascript
+const updatedPerson = update(person, {
+  'job.skills[html]': value => `x${value}`, // xhtml
+  'job.skills[css]': value => value.toUpperCase(), // CSS
 });
 ```
 
@@ -88,13 +98,12 @@ will produce the next result:
 ### Why should I use this?
 It really helps to reduce a huge amount of code, especially when you have to make a lot of updates to deep immutable objects. It can be very useful in Redux with its reducers.
 
-##### Parameters
+### Parameters
 - `original object` [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String "String") The object to update;
-
 - `path string`  [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String "String") | [Object](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Object "Object") Path string, that consists of a list of properties joined by dot; Or it can be an object where keys are paths and values are values for the paths.
 - `value` Any? The value to insert; You won't need to specify this if you use an object as a second argument.
 
-Value can be a function that accepts current value (if present) and expects a new value to be returned.
+Value can be a function that accepts current value (if present) and returns a new one.
 
 Returns updated object;
 
