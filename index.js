@@ -1,9 +1,20 @@
 const isObject = o => typeof o === 'object' 
 const isFunction = f => typeof f === 'function';
+const isNumber = n => typeof Number(n) === 'number';
 const firstOf = arr => arr[0];
 const copyOf = o => Object.assign({}, o);
 
-const replaceInArray = (arr, currentValue, nextValue) => {
+const replaceByIndex = (arr, index, nextValue) => {
+  return arr.map((value, i) => {
+    if (index !== i) {
+      return value;
+    }
+
+    return nextValue;
+  });
+};
+
+const replaceByValue = (arr, currentValue, nextValue) => {
   return arr.map((value) => {
     if (value !== currentValue) {
       return value;
@@ -13,7 +24,7 @@ const replaceInArray = (arr, currentValue, nextValue) => {
   }).filter(value => typeof value !== 'undefined');
 };
 
-const replaceValue = (currentValue, _value) =>
+const getNextValue = (currentValue, _value) =>
   isFunction(_value) ? _value(currentValue) : _value;
 
 const arrayQueryRegex = /\[(.*)\]/;
@@ -32,29 +43,41 @@ const update = (source, path, value) => {
 
   let node = firstOf(pathNodes);
 
+  // contains array query?
   const arrayQueryMatch = node.match(arrayQueryRegex);
 
+  // remove array query
   node = node.replace(arrayQueryRegex, '');
 
-  if (!reducedPath) {
+  const isLastNode = pathNodes.length === 1;
+
+  if (isLastNode) {
     if (arrayQueryMatch && Array.isArray(output[node])) {
       const arr = output[node];
       const query = arrayQueryMatch[1];
-      const currentValue = arr.find(v => v === query);
 
-      output[node] =
-        replaceInArray(arr, query, replaceValue(currentValue, value));
+      if (isNumber(query)) {
+        // searching by index
+        const index = Number(query);
+        const currentValue = arr[index];
+        const nextValue = getNextValue(currentValue, value);
+        output[node] = replaceByIndex(arr, index, nextValue);
+      } else {
+        // searching by value
+        const currentValue = arr.find(v => v === query);
+        const nextValue = getNextValue(currentValue, value);
+        output[node] = replaceByValue(arr, query, nextValue);
+      }
+
       return output;
     } else {
-      output[node] = replaceValue(output[node], value);
+      output[node] = getNextValue(output[node], value);
       return output;
     }
   }
 
-  const isLastNode = pathNodes.length === 1;
-
   const nextStepValue = isObject(source[node])
-    ? copyOf(source[node])
+    ? copyOf(output[node])
     : !isLastNode ? {} : value;
 
   output[node] = update(nextStepValue, reducedPath, value);
