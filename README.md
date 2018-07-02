@@ -70,13 +70,19 @@ const updatedPerson = update(person, {
 });
 ```
 
-I also have an ability to reach array elements by specifying the value I am interested in surrounded by brackets.
+I also have an ability to reach array elements by specifying the value I am interested in surrounded by brackets:
 
 ```javascript
 const updatedPerson = update(person, {
-  'job.skills[html]': value => `x${value}`, // xhtml
+  'job.skills[html]': 'HTML',
   'job.skills[css]': value => value.toUpperCase(), // CSS
 });
+```
+
+Or by index:
+
+```javascript
+const updatedPerson = update(person, 'job.skills[0]', v => v.toUpperCase()); // HTML
 ```
 
 ##### Note: the function does not mutate the original object

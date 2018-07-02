@@ -11,7 +11,7 @@ const replaceByIndex = (arr, index, nextValue) => {
     }
 
     return nextValue;
-  });
+  }).filter(value => typeof value !== 'undefined');
 };
 
 const replaceByValue = (arr, currentValue, nextValue) => {
