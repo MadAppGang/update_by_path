@@ -1,6 +1,6 @@
 {
   "name": "update-by-path",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Update any field of an object using short string path notation",
   "main": "index.js",
   "scripts": {
