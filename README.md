@@ -85,6 +85,11 @@ Or by index:
 const updatedPerson = update(person, 'job.skills[0]', v => v.toUpperCase()); // HTML
 ```
 
+Or by prop value:
+```javascript
+const updatedPerson = update(person, 'job.skills[name=html].proficiency', 50);
+```
+
 ##### Note: the function does not mutate the original object
 
 
