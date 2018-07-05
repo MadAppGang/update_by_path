@@ -1,11 +1,12 @@
 Update by path
 ===
-This function allows you to update fields of your object any level deep without mutating the original object.
+This function allows you to update fields of your object any level deep without mutating the original object. The reason this is awesome is because of simple string-based query language, that allowes you to reach deep values, even inside arrays.
 
 ### Features
-- update a field of an object any level deep by using a shorthand path string;
-- insert new values any level deep using the shorthand path string (not existing path nodes will be created automatically);
-- overwrite fields, if they already exist;
+- update a field of an object any level deep by using a simple path string;
+- reach to deep values of array elements using a string query;
+- insert new values any level deep (not existing path nodes will be created automatically);
+- override fields, if they already exist;
 
 ### Installation
 `npm install --save update-by-path`
@@ -28,7 +29,20 @@ const person = {
       month: 8,
       day: 14,
     },
-    skills: ['html', 'css', 'javascript'],
+    skills: [
+      {
+	    proficiency: 5,
+		name: "JavaScript",
+	  },
+	  {
+	    proficiency: 4,
+		name: "html",
+	  },
+	  {
+	    proficiency: 2,
+		name: "css",
+	  }
+	],
   },
 };
 ```
@@ -53,6 +67,29 @@ Using the shorthand function the code will look like the following:
 const updatedPerson = update(person, 'job.since.month', 7);
 ```
 
+#### Path, or why it is extremely useful.
+
+What we used up there is called path. Path is a string query that specifies a list of nested properties. Here's an example of a simple path:
+
+`path.to.a.property.any.level.deep`
+
+Sometimes objects contain arrays as properties, so the path notation allows to reach elements inside arrays by index:
+
+`path.to.an.array[0]`
+
+There are situations when you don't know the index, so you might want to find an element by a property value:
+
+`path.to.an.array[name="html"]`
+
+You can also continue the path chain getting into deep fields of an array element:
+
+`path.to.an.array[name="html"].path.goes.deeper`
+
+These are query types that you can use to alter deep array elements.
+
+
+#### Examples
+
 I can also update multiple fields at once using a slightly different notation:
 ```javascript
 const updatedPerson = update(person, {
@@ -70,41 +107,30 @@ const updatedPerson = update(person, {
 });
 ```
 
-I also have an ability to reach array elements by specifying the value I am interested in surrounded by brackets:
+There are a lot of situations when you have to update an element of array, that is a field of an object. There is an example of reaching one of John's skills using a path query:
+
+```javascript
+const updatedPerson = update(person, 'job.skills[0]', v => v.toUpperCase());
+```
+
+Not always you have a specific index to reach the element by, so you might want to find it by property value. You can then update any field of the array element any level deep, as you would with a plain property:
 
 ```javascript
 const updatedPerson = update(person, {
-  'job.skills[html]': 'HTML',
-  'job.skills[css]': value => value.toUpperCase(), // CSS
+  'job.skills[name=html].proficiency': value => value + 1,
 });
 ```
 
-Or by index:
-
-```javascript
-const updatedPerson = update(person, 'job.skills[0]', v => v.toUpperCase()); // HTML
-```
-
-Or by prop value:
-```javascript
-const updatedPerson = update(person, 'job.skills[name=html].proficiency', 50);
-```
-
 ##### Note: the function does not mutate the original object
-
-
-You should just specify a string path to the property you want to update. Path is a list of nested properties joined by dot.
-
-An example of path string: `'path.to.a.property.any.level.deep'`
 
 If the original object does not contain properties, specified in the path string - they will be created for you automatically.
 
 So the call
 ```javascript
 update({}, 'any.level.deep', 'insertion');
+
 ```
-will produce the next result:
-`{ any: { level: { deep: 'insertion' } } }`
+will produce the next result: `{ any: { level: { deep: 'insertion' } } }`
 
 ### Why should I use this?
 It really helps to reduce a huge amount of code, especially when you have to make a lot of updates to deep immutable objects. It can be very useful in Redux with its reducers.
