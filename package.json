@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/MadAppGang/update_object_by_path/issues"
   },
-  "homepage": "https://github.com/MadAppGang/update_object_by_path#readme"
+  "homepage": "https://github.com/MadAppGang/update_by_path",
+  "dependencies": {
+    "npm": "^6.1.0"
+  }
 }
