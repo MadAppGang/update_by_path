@@ -30,47 +30,46 @@ const update = (source, path, value) => {
   const pathNodes = path.split('.');
   let node = firstOf(pathNodes);
 
-  // contains array query?
-  const arrayQueryMatch = node.match(ARRAY_QUERY_REGEX);
-
   const isLastNode = pathNodes.length === 1;
 
   if (isLastNode) {
-    const pureNode = purifyNode(node); // node without array query
+    const pureNode = purifyNode(node);
 
-    if (arrayQueryMatch && Array.isArray(output[pureNode])) {
+    if (Array.isArray(output[pureNode])) {
       const arr = output[pureNode];
-      const query = arrayQueryMatch[1];
+      const arrayQueryMatch = node.match(ARRAY_QUERY_REGEX);
+      const queryByPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
 
-      if (isNumber(query)) {
-        // searching by index
-        const index = Number(query);
-        const currentValue = arr[index];
-        const nextValue = getNextValue(currentValue, value);
-        output[pureNode] = replaceByIndex(arr, index, nextValue);
-      } else {
-        // searching by value
-        const currentValue = arr.find(v => v === query);
-        const nextValue = getNextValue(currentValue, value);
-        output[pureNode] = replaceByValue(arr, query, nextValue);
+      if (arrayQueryMatch) {
+        const query = arrayQueryMatch[1];
+
+        if (isNumber(query)) {
+          // searching by index
+          const index = Number(query);
+          const currentValue = arr[index];
+          const nextValue = getNextValue(currentValue, value);
+          output[pureNode] = replaceByIndex(arr, index, nextValue);
+        } else {
+          // searching by value
+          const currentValue = arr.find(v => v === query);
+          const nextValue = getNextValue(currentValue, value);
+          output[pureNode] = replaceByValue(arr, query, nextValue);
+        }
       }
 
-      return output;
-    } else {
-      const queryByPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
-      const arr = output[pureNode];
-
-      if (queryByPropMatch && Array.isArray(output[pureNode])) {
+      if (queryByPropMatch) {
         const [key, val] = queryByPropMatch.slice(1, 3);
         const currentValue = arr.find(v => v[key] === val);
         const nextValue = getNextValue(currentValue, value);
         output[pureNode] = replaceByValue(arr, currentValue, nextValue);
-      } else {
-        output[pureNode] = getNextValue(output[pureNode], value);
       }
 
       return output;
+    } else {
+      output[pureNode] = getNextValue(output[pureNode], value);
+      return output;
     }
+
   }
 
   const currentValue = output[node];
@@ -83,19 +82,44 @@ const update = (source, path, value) => {
     if (isLastNode) {
       nextSource = value;
     } else {
+      const pureNode = purifyNode(node);
+      const arr = output[pureNode];
+      const arrayQueryMatch = node.match(ARRAY_QUERY_REGEX);
       const queryByPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
 
+      if (arrayQueryMatch) {
+        const query = arrayQueryMatch[1];
+
+        if (isNumber(query)) {
+          // searching by index
+          const index = Number(query);
+          const currentValue = arr[index] || {};
+          const nextValue = update(currentValue, reducePath(path), value);
+          output[pureNode] = replaceByIndex(arr, index, nextValue);
+        } else {
+          // searching by value
+          let currentValue = arr.find(v => v === query);
+
+          if (!isObject(currentValue)) {
+            currentValue = {};
+          }
+
+          const nextValue = update(currentValue, reducePath(path), value);
+          output[pureNode] = replaceByValue(arr, query, nextValue);
+        }
+
+        return output;
+      }
+
       if (queryByPropMatch) {
-        const pureNode = purifyNode(node); // node without array query
-        const arr = output[pureNode];
         const [key, val] = queryByPropMatch.slice(1, 3);
-        const currentValue = arr.find(item => item[key] == val);
+        const currentValue = arr.find(item => item[key] == val) || {};
         const nextValue = update(currentValue, reducePath(path), value);
         output[pureNode] = replaceByValue(arr, currentValue, nextValue);
         return output;
-      } else {
-        nextSource = {};
       }
+
+      nextSource = {};
     }
   }
 
