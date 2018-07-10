@@ -1,4 +1,4 @@
-const update = require('../dist/index').default;
+const update = require('../index').default;
 
 const input = {
   name: {
