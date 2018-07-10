@@ -18,7 +18,10 @@
     "object",
     "path",
     "immutable",
-    "recursive"
+    "recursive",
+    "deep",
+    "insert",
+    "upsert"
   ],
   "author": "MadAppGang",
   "license": "ISC",
