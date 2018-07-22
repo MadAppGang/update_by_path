@@ -94,6 +94,14 @@ test('allows to search arrays by primitive values', () => {
   expect(output.job.skills).toContain('JAVASCRIPT');
 });
 
+test('allows to insert field of arrays elements found by primitive values', () => {
+  const output = update(input, 'job.skills[javascript].name', 'javascript');
+
+  console.log(JSON.stringify(output, null, 2));
+
+  expect(output.job.skills[2].name).toBe('javascript');
+});
+
 test('allows to search arrays by index', () => {
   const output = update(input, 'job.skills[1].level', level => level * 2);
 

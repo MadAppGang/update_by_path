@@ -50,3 +50,16 @@ export const replaceByIndexQuery = (arr, query, getNextValue) => {
 
   return replaceByIndex(arr, index, nextValue);
 };
+
+export const replaceByValueQuery = (arr, query, getNextValue) => {
+
+  let currentValue = arr.find(v => v === query);
+
+  if (!currentValue || !isFunction(getNextValue)) {
+    return arr;
+  }
+
+  const nextValue = getNextValue(currentValue);
+
+  return replaceByValue(arr, query, nextValue);
+};

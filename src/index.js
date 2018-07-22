@@ -29,20 +29,19 @@ const update = (source, path, value) => {
         const query = inArrayMatch[1];
 
         if (h.isNumber(query)) {
-          output[pureNode] = h.replaceByIndexQuery(arr, query, (currentValue) => {
-            return h.getNextValue(currentValue, value);
+          output[pureNode] = h.replaceByIndexQuery(arr, query, (curValue) => {
+            return h.getNextValue(curValue, value);
           });
         } else {
-          // searching by value
-          const currentValue = arr.find(v => v === query);
-          const nextValue = h.getNextValue(currentValue, value);
-          output[pureNode] = h.replaceByValue(arr, query, nextValue);
+          output[pureNode] = h.replaceByValueQuery(arr, query, (curValue) => {
+            return h.getNextValue(curValue, value);
+          });
         }
       }
 
       if (byPropMatch) {
         output[pureNode] = h.replaceByPropQuery(
-          arr, byPropMatch, currentValue => h.getNextValue(currentValue, value),
+          arr, byPropMatch, curValue => h.getNextValue(curValue, value),
         );
 
         return output;
@@ -75,19 +74,19 @@ const update = (source, path, value) => {
         const query = inArrayMatch[1];
 
         if (h.isNumber(query)) {
-          output[pureNode] = h.replaceByIndexQuery(arr, query, (currentValue) => {
-            return update(currentValue, h.reducePath(path), value);
+          output[pureNode] = h.replaceByIndexQuery(arr, query, (curValue) => {
+            return update(curValue, h.reducePath(path), value);
           });
         } else {
-          // searching by value
-          let currentValue = arr.find(v => v === query);
+          output[pureNode] = h.replaceByValueQuery(arr, query, (curValue) => {
+            let nextSource = {};
 
-          if (!h.isObject(currentValue)) {
-            currentValue = {};
-          }
+            if (h.isObject(curValue)) {
+              nextSource = curValue;
+            }
 
-          const nextValue = update(currentValue, h.reducePath(path), value);
-          output[pureNode] = h.replaceByValue(arr, query, nextValue);
+            return update(nextSource, h.reducePath(path), value);
+          });
         }
 
         return output;
