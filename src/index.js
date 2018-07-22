@@ -22,18 +22,16 @@ const update = (source, path, value) => {
 
     if (Array.isArray(output[pureNode])) {
       const arr = output[pureNode];
-      const arrayQueryMatch = node.match(ARRAY_QUERY_REGEX);
-      const queryByPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
+      const inArrayMatch = node.match(ARRAY_QUERY_REGEX);
+      const byPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
 
-      if (arrayQueryMatch) {
-        const query = arrayQueryMatch[1];
+      if (inArrayMatch) {
+        const query = inArrayMatch[1];
 
         if (h.isNumber(query)) {
-          // searching by index
-          const index = Number(query);
-          const currentValue = arr[index];
-          const nextValue = h.getNextValue(currentValue, value);
-          output[pureNode] = h.replaceByIndex(arr, index, nextValue);
+          output[pureNode] = h.replaceByIndexQuery(arr, query, (currentValue) => {
+            return h.getNextValue(currentValue, value);
+          });
         } else {
           // searching by value
           const currentValue = arr.find(v => v === query);
@@ -42,11 +40,12 @@ const update = (source, path, value) => {
         }
       }
 
-      if (queryByPropMatch) {
-        const [key, val] = queryByPropMatch.slice(1, 3);
-        const currentValue = arr.find(v => v[key] === val);
-        const nextValue = h.getNextValue(currentValue, value);
-        output[pureNode] = h.replaceByValue(arr, currentValue, nextValue);
+      if (byPropMatch) {
+        output[pureNode] = h.replaceByPropQuery(
+          arr, byPropMatch, currentValue => h.getNextValue(currentValue, value),
+        );
+
+        return output;
       }
 
       return output;
@@ -69,18 +68,16 @@ const update = (source, path, value) => {
     } else {
       const pureNode = h.purifyNode(node);
       const arr = output[pureNode];
-      const arrayQueryMatch = node.match(ARRAY_QUERY_REGEX);
-      const queryByPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
+      const inArrayMatch = node.match(ARRAY_QUERY_REGEX);
+      const byPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
 
-      if (arrayQueryMatch) {
-        const query = arrayQueryMatch[1];
+      if (inArrayMatch) {
+        const query = inArrayMatch[1];
 
         if (h.isNumber(query)) {
-          // searching by index
-          const index = Number(query);
-          const currentValue = arr[index] || {};
-          const nextValue = update(currentValue, h.reducePath(path), value);
-          output[pureNode] = h.replaceByIndex(arr, index, nextValue);
+          output[pureNode] = h.replaceByIndexQuery(arr, query, (currentValue) => {
+            return update(currentValue, h.reducePath(path), value);
+          });
         } else {
           // searching by value
           let currentValue = arr.find(v => v === query);
@@ -96,11 +93,13 @@ const update = (source, path, value) => {
         return output;
       }
 
-      if (queryByPropMatch) {
-        const [key, val] = queryByPropMatch.slice(1, 3);
-        const currentValue = arr.find(item => item[key] == val) || {};
-        const nextValue = update(currentValue, h.reducePath(path), value);
-        output[pureNode] = h.replaceByValue(arr, currentValue, nextValue);
+      if (byPropMatch) {
+        output[pureNode] = h.replaceByPropQuery(
+          arr,
+          byPropMatch,
+          currentValue => update(currentValue, h.reducePath(path), value),
+        );
+
         return output;
       }
 

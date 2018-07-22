@@ -24,3 +24,29 @@ export const replaceByValue = (arr, currentValue, nextValue) =>
 
 export const getNextValue = (currentValue, _value) =>
   isFunction(_value) ? _value(currentValue) : _value;
+
+export const replaceByPropQuery = (arr, match, getNextValue) => {
+  const [key, val] = match.slice(1, 3);
+  const currentValue = arr.find(item => item[key] == val);
+
+  if (!currentValue || !isFunction(getNextValue)) {
+    return arr;
+  }
+
+  const nextValue = getNextValue(currentValue);
+
+  return replaceByValue(arr, currentValue, nextValue);
+};
+
+export const replaceByIndexQuery = (arr, query, getNextValue) => {
+  const index = Number(query);
+  const currentValue = arr[index];
+
+  if (!currentValue || !isFunction(getNextValue)) {
+    return arr;
+  }
+
+  const nextValue = getNextValue(currentValue);
+
+  return replaceByIndex(arr, index, nextValue);
+};
