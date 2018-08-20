@@ -113,3 +113,9 @@ test('allows to search arrays by property value', () => {
 
   expect(output.job.skills[1].name).toEqual('HTML');
 });
+
+test('allows to override an array property', () => {
+  const output = update(input, 'job.skills', null);
+
+  expect(output.job.skills).toBe(null);
+});

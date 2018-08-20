@@ -32,10 +32,12 @@ const update = (source, path, value) => {
           output[pureNode] = h.replaceByIndexQuery(arr, query, (curValue) => {
             return h.getNextValue(curValue, value);
           });
+          return output;
         } else {
           output[pureNode] = h.replaceByValueQuery(arr, query, (curValue) => {
             return h.getNextValue(curValue, value);
           });
+          return output;
         }
       }
 
@@ -47,12 +49,16 @@ const update = (source, path, value) => {
         return output;
       }
 
-      return output;
-    } else {
-      output[pureNode] = h.getNextValue(output[pureNode], value);
-      return output;
+      // output[pureNode] = h.getNextValue(output[pureNode], value);
+      // return output;
+    // } else {
+    //   output[pureNode] = h.getNextValue(output[pureNode], value);
+    //   return output;
+    // }
     }
 
+    output[pureNode] = h.getNextValue(output[pureNode], value);
+    return output;
   }
 
   const currentValue = output[node];
