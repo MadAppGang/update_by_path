@@ -1,27 +1,32 @@
 const update = require('../src').default;
 
-const input = {
-  name: {
-    first: 'John',
-    last: 'Doe',
-  },
-  job: {
-    since: {
-      year: 2018,
-      month: 2,
+let input = null;
+
+beforeEach(() => {
+  input = {
+    name: {
+      first: 'John',
+      last: 'Doe',
     },
-    skills: [
-      {
-        name: 'css',
+    job: {
+      since: {
+        year: 2018,
+        month: 2,
       },
-      {
-        name: 'html',
-        level: 5,
-      },
-      'javascript',
-    ],
-  },
-};
+      skills: [
+        {
+          name: 'css',
+        },
+        {
+          name: 'html',
+          level: 5,
+        },
+        'javascript',
+      ],
+    },
+  };
+});
+
 
 test('creates a copy of the source object', () => {
   const output = update(input, '', null);
@@ -112,8 +117,46 @@ test('allows to search arrays by property value', () => {
   expect(output.job.skills[1].name).toEqual('HTML');
 });
 
+test('allows to add fields to array element found by property value', () => {
+  const output = update(input, 'job.skills[name=html].newField', 'NEW_FIELD');
+
+  expect(output.job.skills[1].newField).toEqual('NEW_FIELD');
+});
+
+test('allows to override array element found by property value', () => {
+  let nextValue = { id: 1 };
+  const output = update(input, 'job.skills[name=html]', nextValue);
+
+  expect(output.job.skills[1]).toEqual(nextValue);
+});
+
 test('allows to override an array property', () => {
   const output = update(input, 'job.skills', null);
 
   expect(output.job.skills).toBe(null);
+});
+
+test('source remains intact if there was no matches by prop query', () => {
+  const output = update(input, 'job.skills[name=4]', null);
+  expect(output).toBe(output);
+});
+
+test('source remains intact if there was no matches by value query', () => {
+  const output = update(input, 'job.skills[fake]', null);
+  expect(output).toBe(output);
+});
+
+test('source remains intact if there was no matches by index', () => {
+  const output = update(input, 'job.skills[11]', null);
+  expect(output).toBe(output);
+});
+
+test('allows to override an array element found by index', () => {
+  const output = update(input, 'job.skills[0]', () => 'Hello');
+  expect(output.job.skills[0]).toBe('Hello');
+});
+
+test('allows to replace a non-object field', () => {
+  const output = update(input, 'name.first', name => name.toUpperCase());
+  expect(output.name.first).toBe(input.name.first.toUpperCase());
 });

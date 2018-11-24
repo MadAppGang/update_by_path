@@ -12,6 +12,8 @@ export const copyOf = o => Object.assign({}, o);
 
 export const reducePath = path => path.split('.').slice(1).join('.');
 
+export const ensureObject = object => isObject(object) ? object : {};
+
 export const filter = arr => arr.filter(v => !isUndefined(v));
 
 export const purifyNode = node => node.replace(/\[.*\]/, '');

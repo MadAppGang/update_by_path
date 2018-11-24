@@ -1,24 +1,22 @@
-import * as helpers from './helpers';
+import * as util from './helpers';
 
 const ARRAY_QUERY_REGEX = /\[(\w+)\]/;
 const ARRAY_QUERY_BY_PROP_REGEX = /\[(\w+)=(\w+)\]/;
 
 const update = (source, path, value) => {
-  if (helpers.isObject(path)) {
-    const config = path;
-
-    return Object.keys(config)
-      .reduce((output, key) => update(output, key, config[key]), source);
+  if (util.isObject(path)) {
+    return Object.keys(path)
+      .reduce((output, key) => update(output, key, path[key]), source);
   }
 
-  const output = helpers.copyOf(source);
+  const output = util.copyOf(source);
   const pathNodes = path.split('.');
-  let node = helpers.firstOf(pathNodes);
+  let node = util.firstOf(pathNodes);
 
   const isLastNode = pathNodes.length === 1;
 
   if (isLastNode) {
-    const pureNode = helpers.purifyNode(node);
+    const pureNode = util.purifyNode(node);
 
     if (Array.isArray(output[pureNode])) {
       const arr = output[pureNode];
@@ -28,29 +26,24 @@ const update = (source, path, value) => {
       if (inArrayMatch) {
         const query = inArrayMatch[1];
 
-        if (helpers.isNumber(query)) {
-          output[pureNode] = helpers.replaceByIndexQuery(arr, query, (curValue) => {
-            return helpers.getNextValue(curValue, value);
-          });
-          return output;
-        } else {
-          output[pureNode] = helpers.replaceByValueQuery(arr, query, (curValue) => {
-            return helpers.getNextValue(curValue, value);
-          });
-          return output;
-        }
+        const replace = util.isNumber(query)
+          ? util.replaceByIndexQuery
+          : util.replaceByValueQuery
+
+        output[pureNode] = replace(arr, query, (curentValue) => {
+          return util.getNextValue(curentValue, value);
+        });
+        return output;
       }
 
       if (byPropMatch) {
-        output[pureNode] = helpers.replaceByPropQuery(
-          arr, byPropMatch, curValue => helpers.getNextValue(curValue, value),
-        );
-
+        const replace = currentValue => util.getNextValue(currentValue, value);
+        output[pureNode] = util.replaceByPropQuery(arr, byPropMatch, replace);
         return output;
       }
     }
 
-    output[pureNode] = helpers.getNextValue(output[pureNode], value);
+    output[pureNode] = util.getNextValue(output[pureNode], value);
     return output;
   }
 
@@ -58,55 +51,42 @@ const update = (source, path, value) => {
 
   let nextSource;
 
-  if (helpers.isObject(currentValue)) {
-    nextSource = helpers.copyOf(currentValue);
-  } else {
-    if (isLastNode) {
-      nextSource = value;
-    } else {
-      const pureNode = helpers.purifyNode(node);
-      const arr = output[pureNode];
-      const inArrayMatch = node.match(ARRAY_QUERY_REGEX);
-      const byPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
-
-      if (inArrayMatch) {
-        const query = inArrayMatch[1];
-
-        if (helpers.isNumber(query)) {
-          output[pureNode] = helpers.replaceByIndexQuery(arr, query, (curValue) => {
-            return update(curValue, helpers.reducePath(path), value);
-          });
-        } else {
-          output[pureNode] = helpers.replaceByValueQuery(arr, query, (curValue) => {
-            let nextSource = {};
-
-            if (helpers.isObject(curValue)) {
-              nextSource = curValue;
-            }
-
-            return update(nextSource, helpers.reducePath(path), value);
-          });
-        }
-
-        return output;
-      }
-
-      if (byPropMatch) {
-        output[pureNode] = helpers.replaceByPropQuery(
-          arr,
-          byPropMatch,
-          currentValue => update(currentValue, helpers.reducePath(path), value),
-        );
-
-        return output;
-      }
-
-      nextSource = {};
-    }
+  if (util.isObject(currentValue)) {
+    nextSource = util.copyOf(currentValue);
+    output[node] = update(nextSource, util.reducePath(path), value);
+    return output;
   }
 
-  output[node] = update(nextSource, helpers.reducePath(path), value);
+  const pureNode = util.purifyNode(node);
+  const arr = output[pureNode];
+  const inArrayMatch = node.match(ARRAY_QUERY_REGEX);
+  const byPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
 
+  if (inArrayMatch) {
+    const query = inArrayMatch[1];
+
+    if (util.isNumber(query)) {
+      output[pureNode] = util.replaceByIndexQuery(arr, query, (currentValue) => {
+        return update(currentValue, util.reducePath(path), value);
+      });
+      return output;
+    }
+
+    output[pureNode] = util.replaceByValueQuery(arr, query, (currentValue) => {
+      return update(util.ensureObject(currentValue), util.reducePath(path), value);
+    });
+
+    return output;
+  }
+
+  if (byPropMatch) {
+    const reducedPath = util.reducePath(path);
+    const replacer = curVal => update(curVal, reducedPath, value);
+    output[pureNode] = util.replaceByPropQuery(arr, byPropMatch, replacer);
+    return output;
+  }
+
+  output[node] = update(nextSource, util.reducePath(path), value);
   return output;
 };
 
