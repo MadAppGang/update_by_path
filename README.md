@@ -107,7 +107,7 @@ update(object, 'deep.path.to.prop', valueToInsert);
 
 update(object, {
   'deep.path.to.props': valueToInsert,
-  'another.path': valueToInsert',
+  'another.path': valueToInsert,
 });
 ```
 They are completely identical, though the second option allows to make multiple insertions at a time.
