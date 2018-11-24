@@ -1,24 +1,24 @@
-import * as h from './helpers';
+import * as helpers from './helpers';
 
 const ARRAY_QUERY_REGEX = /\[(\w+)\]/;
 const ARRAY_QUERY_BY_PROP_REGEX = /\[(\w+)=(\w+)\]/;
 
 const update = (source, path, value) => {
-  if (h.isObject(path)) {
+  if (helpers.isObject(path)) {
     const config = path;
 
     return Object.keys(config)
       .reduce((output, key) => update(output, key, config[key]), source);
   }
 
-  const output = h.copyOf(source);
+  const output = helpers.copyOf(source);
   const pathNodes = path.split('.');
-  let node = h.firstOf(pathNodes);
+  let node = helpers.firstOf(pathNodes);
 
   const isLastNode = pathNodes.length === 1;
 
   if (isLastNode) {
-    const pureNode = h.purifyNode(node);
+    const pureNode = helpers.purifyNode(node);
 
     if (Array.isArray(output[pureNode])) {
       const arr = output[pureNode];
@@ -28,29 +28,29 @@ const update = (source, path, value) => {
       if (inArrayMatch) {
         const query = inArrayMatch[1];
 
-        if (h.isNumber(query)) {
-          output[pureNode] = h.replaceByIndexQuery(arr, query, (curValue) => {
-            return h.getNextValue(curValue, value);
+        if (helpers.isNumber(query)) {
+          output[pureNode] = helpers.replaceByIndexQuery(arr, query, (curValue) => {
+            return helpers.getNextValue(curValue, value);
           });
           return output;
         } else {
-          output[pureNode] = h.replaceByValueQuery(arr, query, (curValue) => {
-            return h.getNextValue(curValue, value);
+          output[pureNode] = helpers.replaceByValueQuery(arr, query, (curValue) => {
+            return helpers.getNextValue(curValue, value);
           });
           return output;
         }
       }
 
       if (byPropMatch) {
-        output[pureNode] = h.replaceByPropQuery(
-          arr, byPropMatch, curValue => h.getNextValue(curValue, value),
+        output[pureNode] = helpers.replaceByPropQuery(
+          arr, byPropMatch, curValue => helpers.getNextValue(curValue, value),
         );
 
         return output;
       }
     }
 
-    output[pureNode] = h.getNextValue(output[pureNode], value);
+    output[pureNode] = helpers.getNextValue(output[pureNode], value);
     return output;
   }
 
@@ -58,13 +58,13 @@ const update = (source, path, value) => {
 
   let nextSource;
 
-  if (h.isObject(currentValue)) {
-    nextSource = h.copyOf(currentValue);
+  if (helpers.isObject(currentValue)) {
+    nextSource = helpers.copyOf(currentValue);
   } else {
     if (isLastNode) {
       nextSource = value;
     } else {
-      const pureNode = h.purifyNode(node);
+      const pureNode = helpers.purifyNode(node);
       const arr = output[pureNode];
       const inArrayMatch = node.match(ARRAY_QUERY_REGEX);
       const byPropMatch = node.match(ARRAY_QUERY_BY_PROP_REGEX);
@@ -72,19 +72,19 @@ const update = (source, path, value) => {
       if (inArrayMatch) {
         const query = inArrayMatch[1];
 
-        if (h.isNumber(query)) {
-          output[pureNode] = h.replaceByIndexQuery(arr, query, (curValue) => {
-            return update(curValue, h.reducePath(path), value);
+        if (helpers.isNumber(query)) {
+          output[pureNode] = helpers.replaceByIndexQuery(arr, query, (curValue) => {
+            return update(curValue, helpers.reducePath(path), value);
           });
         } else {
-          output[pureNode] = h.replaceByValueQuery(arr, query, (curValue) => {
+          output[pureNode] = helpers.replaceByValueQuery(arr, query, (curValue) => {
             let nextSource = {};
 
-            if (h.isObject(curValue)) {
+            if (helpers.isObject(curValue)) {
               nextSource = curValue;
             }
 
-            return update(nextSource, h.reducePath(path), value);
+            return update(nextSource, helpers.reducePath(path), value);
           });
         }
 
@@ -92,10 +92,10 @@ const update = (source, path, value) => {
       }
 
       if (byPropMatch) {
-        output[pureNode] = h.replaceByPropQuery(
+        output[pureNode] = helpers.replaceByPropQuery(
           arr,
           byPropMatch,
-          currentValue => update(currentValue, h.reducePath(path), value),
+          currentValue => update(currentValue, helpers.reducePath(path), value),
         );
 
         return output;
@@ -105,7 +105,7 @@ const update = (source, path, value) => {
     }
   }
 
-  output[node] = update(nextSource, h.reducePath(path), value);
+  output[node] = update(nextSource, helpers.reducePath(path), value);
 
   return output;
 };
