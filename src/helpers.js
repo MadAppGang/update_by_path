@@ -8,7 +8,7 @@ export const isUndefined = v => typeof v === 'undefined';
 
 export const firstOf = arr => arr[0];
 
-export const copyOf = o => ({ ...o });
+export const copyOf = o => Object.assign({}, o);
 
 export const reducePath = path => path.split('.').slice(1).join('.');
 
