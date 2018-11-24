@@ -3,151 +3,181 @@ Update by path
 [![Build Status](https://travis-ci.org/MadAppGang/update_by_path.svg?branch=master)](https://travis-ci.org/MadAppGang/update_by_path)
 [![Coverage Status](https://coveralls.io/repos/github/MadAppGang/update_by_path/badge.svg?branch=master)](https://coveralls.io/github/MadAppGang/update_by_path?branch=master)
 
-This function allows you to update fields of your object any level deep without mutating the original object. The reason this is awesome is because of simple string-based query language, that allowes you to reach deep values, even inside arrays.
+## Intent
 
-### Features
-- update a field of an object any level deep by using a simple path string;
-- reach to deep values of array elements using a string query;
-- insert new values any level deep (not existing path nodes will be created automatically);
-- override fields, if they already exist;
+It is a function that allows to make immutable alterations to objects. It's meant to reduce the code needed to update a deep value without any mutations. It brings readability by reducing the verbosity.
 
-### Installation
-`npm install --save update-by-path`
 
-Then using es6 import the function:
+## Installation
+As simple as that
+
+`npm i --save update-by-path`
+
 ```javascript
 import update from 'update-by-path';
 ```
 
-### Usage
-Lets say we have an object like down below:
+## Real-world example
+I find this package extremely useful with redux reducers, so I'm going to use one of those as an example.
+
+First off, let's take a look at what a simple reducer would look like without this package.
+
 ```javascript
-const person = {
-  name: 'John Doe',
-  job: {
-    company: 'MadAppGang',
-    position: 'Software engineer',
-    since: {
-      year: 2018,
-      month: 8,
-      day: 14,
-    },
-    skills: [
-      {
-	    proficiency: 5,
-		name: "JavaScript",
-	  },
-	  {
-	    proficiency: 4,
-		name: "html",
-	  },
-	  {
-	    proficiency: 2,
-		name: "css",
-	  }
-	],
-  },
+  const INITIAL_STATE = {
+    isFetching: false,
+    list: [],
+    error: null,
+  };
+
+  export default (state = INITIAL_STATE, action) => {
+    const { type, payload } = action;
+
+    switch (type) {
+      case types.FETCH_ATTEMPT:
+        return {
+          ...state,
+          isFetching: true,
+        };
+      case types.FETCH_SUCCESS:
+        return {
+          ...state,
+          isFetching: false,
+          list: payload,
+        };
+      default:
+        return state;
+    }
+  };
+```
+
+It can be a lot shorter if we used **update** from the package
+
+```javascript
+...
+
+case types.FETCH_ATTEMPT:
+  return update(state, { isFetching: true });
+case types.FETCH_SUCCESS:
+  return update(state, { isFetching: false, list: payload });
+default:
+  return state;
+
+...
 };
 ```
-If I wanted to update, for example, the month John started the position at MadAppGang, I would have to write something like this:
+
+Same result. What about a bit more complex alterations?
+
+Here we got to replace a list element by id:
+```javascript
+...
+
+case types.REPLACE_BY_ID
+  return {
+    ...state,
+    list: state.list.map((element) => {
+      if (element.id === payload.id) {
+        return payload;
+      }
+      return element;
+    });
+  };
+
+...
+```
+
+Let's apply the **update** function:
 
 ```javascript
-const updatedPerson = {
-  ...person,
-  job: {
-    ...person.job,
-    since: {
-      ...person.job.since,
-      month: 7,
-    },
-  },
+...
+
+case types.REPLACE_BY_ID:
+  return update(state, `list[id=${payload.id}]`, payload);
+
+...
+```
+
+Still a single line, and still completely immutable.
+
+## API
+
+It accepts eihter 2, or 3 arguments.
+```javascript
+update(object, 'deep.path.to.prop', valueToInsert);
+
+update(object, {
+  'deep.path.to.props': valueToInsert,
+  'another.path': valueToInsert',
+});
+```
+They are completely identical, though the second option allows to make multiple insertions at a time.
+
+### Create new nodes
+If the path contains nodes that do not exist in the source object, they are going to be created
+```javascript
+update({}, 'deep.path', 'value');
+// { deep: { path: 'value' } }
+```
+
+### Use function as a value
+If you need to generate next value based on the previous one, use a function
+```javascript
+const user = {
+  name: 'John',
 };
-```
-This does not look compact at all, so there is a way to get rid of that massive piece of code.
 
-Using the shorthand function the code will look like the following:
-```javascript
-const updatedPerson = update(person, 'job.since.month', 7);
-```
-
-#### Path, or why it is extremely useful.
-
-What we used up there is called path. Path is a string query that specifies a list of nested properties. Here's an example of a simple path:
-
-`path.to.a.property.any.level.deep`
-
-Sometimes objects contain arrays as properties, so the path notation allows to reach elements inside arrays by index:
-
-`path.to.an.array[0]`
-
-There are situations when you don't know the index, so you might want to find an element by a property value:
-
-`path.to.an.array[name="html"]`
-
-You can also continue the path chain getting into deep fields of an array element:
-
-`path.to.an.array[name="html"].path.goes.deeper`
-
-These are query types that you can use to alter deep array elements.
-
-
-#### Examples
-
-I can also update multiple fields at once using a slightly different notation:
-```javascript
-const updatedPerson = update(person, {
-  'job.since.month': 7,
-  'job.position': 'Software architect',
+update(user, {
+  name: name => name.toUpperCase(),
 });
+// { name: 'JOHN' }
 ```
 
-If you I need to apply more complex logic i can pass a function as a value. The function accepts the current value and should return a new one.
-
+### Go deep inside arrays
+By value
 ```javascript
-const updatedPerson = update(person, {
-  'job.since.month': month => month + 2,
-  'job.position': 'Software architect',
-});
+const user = {
+  skills: ['html', 'javascript'],
+};
+
+update(user, `skills[javascript]`, 'JavaScript');
+// { skills: ['html', 'JavaScript' ] }
 ```
 
-There are a lot of situations when you have to update an element of array, that is a field of an object. There is an example of reaching one of John's skills using a path query:
-
+By index
 ```javascript
-const updatedPerson = update(person, 'job.skills[0]', v => v.toUpperCase());
+const user = {
+  skills: ['html', 'javascript'],
+};
+
+update(user, `skills[0]`, skill => skill.toUpperCase());
+// { skills: ['HTML', 'javascript' ] }
 ```
 
-Not always you have a specific index to reach the element by, so you might want to find it by property value. You can then update any field of the array element any level deep, as you would with a plain property:
-
+By property value
 ```javascript
-const updatedPerson = update(person, {
-  'job.skills[name=html].proficiency': value => value + 1,
-});
+const user = {
+  skills: [{ name: 'html'}, { name: 'javascript' }],
+};
+
+update(user, `skills[name=javascript]`, { name: 'JavaScript' });
+// { skills: [{ name: 'html'}, { name: 'JavaScript' }] },
 ```
 
-##### Note: the function does not mutate the original object
+If there were no matches for your query the source object remains intact.
 
-If the original object does not contain properties, specified in the path string - they will be created for you automatically.
-
-So the call
+### Go even deeper inside array elements.
+Alter a property of the matching array element. It doesn't metter which kind of query to use to match the element.
 ```javascript
-update({}, 'any.level.deep', 'insertion');
+const user = {
+  skills: [{ name: 'html'}, { name: 'javascript' }],
+};
 
+update(user, `skills[name=html].name`, name => name.toUpperCase());
+// { skills: [{ name: 'HTML'}, { name: 'javascript' }] },
 ```
-will produce the next result: `{ any: { level: { deep: 'insertion' } } }`
 
-### Why should I use this?
-It really helps to reduce a huge amount of code, especially when you have to make a lot of updates to deep immutable objects. It can be very useful in Redux with its reducers.
-
-### Parameters
-- `original object` [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String "String") The object to update;
-- `path string`  [String](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String "String") | [Object](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Object "Object") Path string, that consists of a list of properties joined by dot; Or it can be an object where keys are paths and values are values for the paths.
-- `value` Any? The value to insert; You won't need to specify this if you use an object as a second argument.
-
-Value can be a function that accepts current value (if present) and returns a new one.
-
-Returns updated object;
-
-### Contribute
+## Contribute
 First off, thanks for taking the time to contribute! Now, take a moment to be sure your contributions make sense to everyone else.
 
-This is written with plain javascript so you will not need any additional environment to run this.
+## LICENSE
+This project is licensed under the MIT License - see the LICENSE file for details.
