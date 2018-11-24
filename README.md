@@ -1,5 +1,8 @@
 Update by path
 ===
+[![Build Status](https://travis-ci.org/MadAppGang/update_by_path.svg?branch=master)](https://travis-ci.org/MadAppGang/update_by_path)
+[![Coverage Status](https://coveralls.io/repos/github/MadAppGang/update_by_path/badge.svg?branch=master)](https://coveralls.io/github/MadAppGang/update_by_path?branch=master)
+
 This function allows you to update fields of your object any level deep without mutating the original object. The reason this is awesome is because of simple string-based query language, that allowes you to reach deep values, even inside arrays.
 
 ### Features
