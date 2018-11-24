@@ -2,12 +2,12 @@
   "name": "update-by-path",
   "version": "1.1.9",
   "description": "Update any field of an object using short string path notation",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "babel src -d dist",
+    "build": "rm -rf dist && babel src -d dist",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:w": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "repository": {
     "type": "git",

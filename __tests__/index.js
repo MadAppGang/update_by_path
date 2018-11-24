@@ -1,4 +1,4 @@
-const update = require('../index').default;
+const update = require('../src').default;
 
 const input = {
   name: {

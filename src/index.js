@@ -48,13 +48,6 @@ const update = (source, path, value) => {
 
         return output;
       }
-
-      // output[pureNode] = h.getNextValue(output[pureNode], value);
-      // return output;
-    // } else {
-    //   output[pureNode] = h.getNextValue(output[pureNode], value);
-    //   return output;
-    // }
     }
 
     output[pureNode] = h.getNextValue(output[pureNode], value);
