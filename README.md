@@ -50,7 +50,7 @@ First off, let's take a look at what a simple reducer would look like without th
   };
 ```
 
-It can be a lot shorter if we used **update** from the package
+It can be a lot shorter if we use **update** from the package
 
 ```javascript
 ...
@@ -101,7 +101,7 @@ Still a single line, and still completely immutable.
 
 ## API
 
-It accepts eihter 2, or 3 arguments.
+It accepts either 2, or 3 arguments.
 ```javascript
 update(object, 'deep.path.to.prop', valueToInsert);
 
@@ -163,7 +163,7 @@ update(user, `skills[name=javascript]`, { name: 'JavaScript' });
 // { skills: [{ name: 'html'}, { name: 'JavaScript' }] },
 ```
 
-If there were no matches for your query the source object remains intact.
+If there are no matches for your query the source object remains intact.
 
 ### Go even deeper inside array elements.
 Alter a property of the matching array element. It doesn't metter which kind of query to use to match the element.
