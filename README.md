@@ -11,10 +11,10 @@ It is a function that allows to make immutable alterations to objects. It's mean
 ## Installation
 As simple as that
 
-`npm i --save update-by-path`
+`npm i --save @madappgang/update-by-path`
 
 ```javascript
-import update from 'update-by-path';
+import update from '@madappgang/update-by-path';
 ```
 
 ## Real-world example
