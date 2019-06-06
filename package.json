@@ -1,6 +1,6 @@
 {
   "name": "@madappgang/update-by-path",
-  "version": "1.1.16",
+  "version": "1.1.19",
   "description": "Easy deep immutable updates to objects",
   "main": "dist/index.js",
   "scripts": {
@@ -31,10 +31,9 @@
   },
   "homepage": "https://github.com/MadAppGang/update_by_path",
   "devDependencies": {
-    "babel-preset-env": "^1.7.0",
-    "jest": "^23.3.0"
+    "@babel/cli": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "jest": "^24.8.0"
   },
-  "dependencies": {
-    "babel-cli": "^6.26.0"
-  }
+  "dependencies": {}
 }
